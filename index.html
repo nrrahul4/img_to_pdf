@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="style.css" type="text/css">
+
+</head>
+
+<body>
+    <h1>Image to PDF conveter</h1>
+    <form method="post" enctype="multipart/form-data">
+        <div>
+            <label for="imgselect">Select file: </label>
+            <input name="imgselect" id="imgselect" type="file" accept=".jpg, .jpeg, .png" />
+        </div>
+        <div class="preview">
+            <!-- <canvas id="canvas" style="width: 300px; height: 400px"></canvas> -->
+            <p>No files selected for upload.</p>
+        </div>
+        <div>
+            <button>Convert to PDF</button>
+        </div>
+    </form>
+</body>
+
+
+<script>
+
+
+    const fileTypes = [
+        "image/apng",
+        "image/bmp",
+        "image/gif",
+        "image/jpeg",
+        "image/pjpeg",
+        "image/png",
+        "image/svg+xml",
+        "image/tiff",
+        "image/webp",
+        "image/x-icon"
+    ];
+
+    function validFileType(file) {
+        return fileTypes.includes(file.type);
+    }
+
+    function returnFileSize(number) {
+        if (number < 1024) {
+            return number + 'bytes';
+        } else if (number >= 1024 && number < 1048576) {
+            return (number / 1024).toFixed(1) + 'KB';
+        } else if (number >= 1048576) {
+            return (number / 1048576).toFixed(1) + 'MB';
+        }
+    }
+
+
+    const preview = document.querySelector('.preview');
+    const input = document.querySelector('input');
+    const btn = document.querySelector('button');
+    const canvas = document.getElementById('canvas');
+
+    input.addEventListener('change', updateImageDisplay);
+
+    btn.addEventListener('click', onButtonClick, false);
+    var imageBlob = '';
+
+    function updateImageDisplay() {
+        while (preview.firstChild) {
+            preview.removeChild(preview.firstChild);
+        }
+        const selFiles = input.files;
+
+        if (selFiles.length === 0) {
+            const para = document.createElement('p');
+            para.textContent = "No files selected for upload.";
+            preview.appendChild(para);
+        } else {
+            const list = document.createElement('ol');
+            preview.appendChild(list);
+
+            for (const file of selFiles) {
+                const listItem = document.createElement('li');
+                const para = document.createElement('p');
+
+                if (validFileType(file)) {
+                    para.textContent = `File name ${file.name}, File size ${returnFileSize(file.size)}`;
+                    const image = document.createElement('img');
+                    image.src = URL.createObjectURL(file);
+                    image.style.width = "200px";
+                    image.style.height = "200px";
+                    listItem.appendChild(image);
+                    listItem.appendChild(para);
+                } else {
+                    para.textContent = `File name ${file.name}: Not a valid file type. Update your selection.`;
+                    para.style.color = "red";
+                    listItem.appendChild(para);
+                }
+
+                list.appendChild(listItem);
+
+
+            }
+        }
+    }
+    function onButtonClick(e) {
+        e.preventDefault();
+        if (imageBlob) {
+            var doc = new jsPDF();
+            doc.addImage(imageBlob, 15, 15, 100, 100);
+            doc.save('out.pdf');
+        }
+
+    }
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.4.1/jspdf.debug.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/2.3.4/jspdf.plugin.autotable.min.js"></script>
+
+
+</html>
